@@ -86,11 +86,11 @@ ALTER TABLE ONLY public.account ALTER COLUMN id SET DEFAULT nextval('public.acco
 --
 
 COPY public.account (id, cash) FROM stdin;
-1	44.4
 2	154.90
 3	60.10
 4	833.15
 5	1000.00
+1	29.4
 \.
 
 
@@ -99,8 +99,8 @@ COPY public.account (id, cash) FROM stdin;
 --
 
 COPY public.flyway_schema_history (installed_rank, version, description, type, script, checksum, installed_by, installed_on, execution_time, success) FROM stdin;
-1	1	structure	SQL	V1__structure.sql	1550199705	postgres	2022-08-11 16:47:38.256483	8	t
-2	2	data	SQL	V2__data.sql	-764607499	postgres	2022-08-11 16:47:38.275055	2	t
+1	1	structure	SQL	V1__structure.sql	1550199705	postgres	2022-08-11 17:39:18.363482	7	t
+2	2	data	SQL	V2__data.sql	-764607499	postgres	2022-08-11 17:39:18.381915	3	t
 \.
 
 

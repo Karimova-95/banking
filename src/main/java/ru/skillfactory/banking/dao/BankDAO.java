@@ -1,13 +1,13 @@
 package ru.skillfactory.banking.dao;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.skillfactory.banking.dto.User;
 import ru.skillfactory.banking.dto.UserMapper;
+import ru.skillfactory.banking.exception.InsufficientFundsToWriteOffException;
+import ru.skillfactory.banking.exception.UserNotFoundException;
 
-@Slf4j
 @Repository
 public class BankDAO {
 
@@ -26,7 +26,7 @@ public class BankDAO {
         try {
             user = jdbcTemp.queryForObject(sql, mapSqlParameterSource, mapper);
         } catch (Exception ex) {
-            user = null;
+            throw new UserNotFoundException(id);
         }
         return user;
     }
@@ -41,35 +41,19 @@ public class BankDAO {
 
     public double getBalance(long userId) {
         User user = getUser(userId);
-        if (user != null) {
-            log.info("Баланс пользователя: " + user.getCash());
-        } else {
-            log.info("Не найден пользователь с таким id");
-            return -1;
-        }
         return user.getCash();
     }
 
     public int takeMoney(long userId, double takeCash) {
         User user = getUser(userId);
-        if (user == null) {
-            log.info("Не найден пользователь с таким id");
-            return 0;
-        } else if (user.getCash() < takeCash) {
-            log.info("Недостаточно средств на счёте!");
-            return 0;
+        if (user.getCash() < takeCash) {
+            throw new InsufficientFundsToWriteOffException();
         }
-        log.info("Деньги успешно сняты!");
         return update(user, -takeCash);
     }
 
     public int putMoney(long userId, double putCash) {
         User user = getUser(userId);
-        if (user == null) {
-            log.info("Не найден пользователь с таким id");
-            return 0;
-        }
-        log.info("Деньги успешно поступили на счёт!");
         return update(user, putCash);
     }
 

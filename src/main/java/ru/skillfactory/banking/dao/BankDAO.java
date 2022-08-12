@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import ru.skillfactory.banking.dto.User;
 import ru.skillfactory.banking.dto.UserMapper;
 import ru.skillfactory.banking.exception.InsufficientFundsToWriteOffException;
+import ru.skillfactory.banking.exception.MoneyCouldNotBeNegativeException;
 import ru.skillfactory.banking.exception.UserNotFoundException;
 
 @Repository
@@ -46,14 +47,19 @@ public class BankDAO {
 
     public int takeMoney(long userId, double takeCash) {
         User user = getUser(userId);
-        if (user.getCash() < takeCash) {
+        if (user.getCash() <= takeCash) {
             throw new InsufficientFundsToWriteOffException();
+        } else if (takeCash <= 0) {
+            throw new MoneyCouldNotBeNegativeException();
         }
         return update(user, -takeCash);
     }
 
     public int putMoney(long userId, double putCash) {
         User user = getUser(userId);
+        if (putCash <= 0) {
+            throw new MoneyCouldNotBeNegativeException();
+        }
         return update(user, putCash);
     }
 

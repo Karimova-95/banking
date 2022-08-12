@@ -18,8 +18,8 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
             UserNotFoundException ex, WebRequest request) {
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("code", "-1");
-        body.put("message", "User not found");
+        body.put("value", "-1");
+        body.put("message", "Пользователь не найден");
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -29,8 +29,19 @@ public class ControllerAdvisor extends ResponseEntityExceptionHandler {
             InsufficientFundsToWriteOffException ex, WebRequest request) {
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("code", "0");
-        body.put("message", "Insufficient funds to write off");
+        body.put("value", "0");
+        body.put("message", "Недостаточно средств на счёте");
+
+        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MoneyCouldNotBeNegativeException.class)
+    public ResponseEntity<Object> handleMoneyCouldNotBeNegativeException(
+            MoneyCouldNotBeNegativeException ex, WebRequest request) {
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("value", "0");
+        body.put("message", "Проверьте значение cash");
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }

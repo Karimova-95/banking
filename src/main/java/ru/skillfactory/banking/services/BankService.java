@@ -1,10 +1,12 @@
 package ru.skillfactory.banking.services;
 
-import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import ru.skillfactory.banking.config.CurrencyConfig;
 import ru.skillfactory.banking.dao.OperationRepository;
 import ru.skillfactory.banking.dao.UserRepository;
 import ru.skillfactory.banking.dto.OperationDto;
@@ -16,23 +18,22 @@ import ru.skillfactory.banking.model.Operation;
 import ru.skillfactory.banking.model.OperationType;
 import ru.skillfactory.banking.model.User;
 
-import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Data
 @Service
-@ConfigurationProperties(prefix = "money")
+@RequiredArgsConstructor
 public class BankService {
 
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private CurrencyConfig currencyConfig;
+    @Autowired
     private OperationRepository operationRepository;
-    private OperationMapper operationMapper = Mappers.getMapper(OperationMapper.class);
-    private String currency;
+    private final OperationMapper operationMapper = Mappers.getMapper(OperationMapper.class);
 
     private User getUser(long userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -59,10 +60,10 @@ public class BankService {
 
     public String getBalance(long userId) {
         User user = getUser(userId);
-        return String.join(" ", String.valueOf(user.getCash()), currency);
+        return String.join(" ", String.valueOf(user.getCash()), currencyConfig.getCurrency());
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public int takeMoney(long userId, double takeCash, LocalDate dateTime) {
         User user = getUser(userId);
         if (user.getCash() <= takeCash) {
@@ -75,7 +76,7 @@ public class BankService {
         return 1;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRED)
     public int putMoney(long userId, double putCash, LocalDate dateTime) {
         User user = getUser(userId);
         if (putCash <= 0) {
@@ -93,14 +94,13 @@ public class BankService {
         } else {
             operations = operationRepository.findOperationByUserIdAndDateBetween(userId, from, to);
         }
-        return operations.stream().map(operation -> operationMapper.toDto(operation)).collect(Collectors.toSet());
+        return operations.stream().map(operationMapper::toDto).collect(Collectors.toSet());
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(propagation = Propagation.REQUIRED)
     public int transfer(long fromUserId, long toUserId, double cash) {
-        if (takeMoney(fromUserId, cash, LocalDate.now()) == 1) {
-            putMoney(toUserId, cash, LocalDate.now());
-        }
+        takeMoney(fromUserId, cash, LocalDate.now());
+        putMoney(toUserId, cash, LocalDate.now());
         return 1;
     }
 }

@@ -11,10 +11,10 @@ import ru.skillfactory.banking.dto.OperationDto;
 public interface OperationMapper {
 
     @Mapping(source = "user", target = "userId", qualifiedByName = "userToUserId")
-    public OperationDto toDto(Operation operation);
+    OperationDto toDto(Operation operation);
 
     @Named("userToUserId")
-    public static long userToUserId(User user) {
+    static long userToUserId(User user) {
         return user.getId();
     }
 }

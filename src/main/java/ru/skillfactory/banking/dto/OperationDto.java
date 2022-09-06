@@ -1,12 +1,14 @@
 package ru.skillfactory.banking.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.skillfactory.banking.model.OperationType;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 public class OperationDto {
     private long userId;

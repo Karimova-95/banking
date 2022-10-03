@@ -185,18 +185,24 @@ class BankServiceTest {
     }
 
     @Test
-    void transferFromNotExistUserTest() {
-        when(userRepository.findById(1L)).thenThrow(UserNotFoundException.class);
+    void transferWhenNotEnoughMoneyTest() {
+        User userFrom = new User(1L, 100.00, Collections.emptySet());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(userFrom));
+        User userTo = new User(2L, 850.00, Collections.emptySet());
+        when(userRepository.findById(2L)).thenReturn(Optional.of(userTo));
 
-        assertThrows(UserNotFoundException.class, () -> bankService.transfer(1L, 2L, 350.00));
+        assertThrows(InsufficientFundsToWriteOffException.class, () -> bankService.transfer(1L, 2L, 350.00));
     }
 
-    @Test
-    void transferToNotExistUserTest() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(new User(1L, 6000.00, Collections.emptySet())));
-        when(userRepository.findById(2L)).thenThrow(UserNotFoundException.class);
 
-        assertThrows(UserNotFoundException.class, () -> bankService.transfer(1L, 2L, 350.00));
+    @Test
+    void transferNegativeMoneyTest() {
+        User userFrom = new User(1L, 100.00, Collections.emptySet());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(userFrom));
+        User userTo = new User(2L, 850.00, Collections.emptySet());
+        when(userRepository.findById(2L)).thenReturn(Optional.of(userTo));
+
+        assertThrows(MoneyCouldNotBeNegativeException.class, () -> bankService.transfer(1L, 2L, -350.00));
     }
 
     @Test

@@ -99,8 +99,30 @@ public class BankService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public int transfer(long fromUserId, long toUserId, double cash) {
-        takeMoney(fromUserId, cash, LocalDate.now());
-        putMoney(toUserId, cash, LocalDate.now());
+        User userFrom = getUser(fromUserId);
+        User userTo = getUser(toUserId);
+        if (userFrom.getCash() < cash) {
+            throw new InsufficientFundsToWriteOffException();
+        } else if (cash < 0) {
+            throw new MoneyCouldNotBeNegativeException();
+        } else if (userFrom.getCash() >= cash) {
+            userFrom.setCash(userFrom.getCash() - cash);
+            userTo.setCash(userTo.getCash() + cash);
+
+            Operation transferOperationFrom = new Operation();
+            transferOperationFrom.setUser(userFrom);
+            transferOperationFrom.setOperationType(OperationType.TRANSFER);
+            transferOperationFrom.setCash(-cash);
+            transferOperationFrom.setDate(LocalDate.now());
+            operationRepository.save(transferOperationFrom);
+
+            Operation transferOperationTo = new Operation();
+            transferOperationTo.setUser(userTo);
+            transferOperationTo.setOperationType(OperationType.TRANSFER);
+            transferOperationTo.setCash(cash);
+            transferOperationTo.setDate(LocalDate.now());
+            operationRepository.save(transferOperationTo);
+        }
         return 1;
     }
 }

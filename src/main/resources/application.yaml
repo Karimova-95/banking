@@ -12,9 +12,9 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         hbm2ddl:
           import_files: data.sql
-#        dialect: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create
 
@@ -23,4 +23,4 @@ money:
 logging:
   level:
     root: error
-    org.springframework.data: debug
+    org.springframework.data: info
